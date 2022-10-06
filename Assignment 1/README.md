@@ -1,1 +1,0 @@
-# Mobile-and-Wearable-Computing-Assignments
