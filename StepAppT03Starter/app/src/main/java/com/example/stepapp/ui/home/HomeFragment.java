@@ -134,7 +134,7 @@ class StepCounterListener implements SensorEventListener {
                 SimpleDateFormat jdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 jdf.setTimeZone(TimeZone.getTimeZone("GMT+2"));
                 String date = jdf.format(timeInMillis);
-
+                /*
                 // print a value every 1000 ms
                 long curTime = System.currentTimeMillis();
                 if ((curTime - lastUpdate) > 1000) {

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="hourBarChart" type="id" />
+    <item name="loadingBar" type="id" />
+    <item name="dayBarChart" type="id" />
+</resources>

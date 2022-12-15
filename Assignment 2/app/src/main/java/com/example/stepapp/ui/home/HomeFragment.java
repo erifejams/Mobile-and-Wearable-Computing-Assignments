@@ -5,7 +5,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.location.GnssAntennaInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,49 +18,77 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.stepapp.databinding.FragmentHomeBinding;
 import com.example.stepapp.R;
+import com.example.stepapp.ui.gallery.GalleryViewModel;
 import com.google.android.material.button.MaterialButtonToggleGroup;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Date;
 import java.util.TimeZone;
 import java.text.SimpleDateFormat;
 
+import android.content.ContentValues;
+import android.database.sqlite.SQLiteDatabase;
+
 public class HomeFragment extends Fragment {
     MaterialButtonToggleGroup materialButtonToggleGroup;
+    public Context context;
 
     // Text view and Progress Bar variables
     public TextView stepsCountTextView;
-    public  ProgressBar progressBar;
+    //public  ProgressBar progressBar;
+    public ProgressBar stepsCountProgressBar;
 
 
     private SensorEventListener listener;
     //ACC sensors
     private Sensor mSensorACC;
-    private SensorManager mSensorMangaer;
+    private SensorManager mSensorManager;
     private Sensor mSensorStepDetector;
+
+    //Completed steps
+    static int stepsCompleted = 0;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        HomeViewModel homeViewModel =
-                new ViewModelProvider(this).get(HomeViewModel.class);
+        HomeViewModel homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
 
         View root  = inflater.inflate(R.layout.fragment_home, container,  false);
 
+        // TODO: Get the number of steps stored in the current date
+        Date cDate = new Date();
+        String fDate = new SimpleDateFormat("yyyy-MM-dd").format(cDate);
+        stepsCompleted = GalleryViewModel.loadSingleRecord(getContext(), fDate);
+
         stepsCountTextView = (TextView) root.findViewById(R.id.stepsCount);
-        stepsCountTextView.setText("1000");
-
-        progressBar = (ProgressBar) root.findViewById(R.id.progressBar);
-        progressBar.setMax(6000);
-        progressBar.setProgress(1000);
+        //stepsCountTextView.setText("1000");
 
 
-        // TODO 2: Get an instance of the sensor manager.
-        mSensorMangaer = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
-        mSensorACC = mSensorMangaer.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
+        stepsCountProgressBar = (ProgressBar) root.findViewById(R.id.progressBar);
+        stepsCountProgressBar.setMax(100);
+        //progressBar = (ProgressBar) root.findViewById(R.id.progressBar);
+        //progressBar.setMax(6000);
+        //progressBar.setProgress(1000);
 
-        listener = new StepCounterListener(stepsCountTextView);
+        // Set the Views with the number of stored steps
+        stepsCountTextView.setText(String.valueOf(stepsCompleted));
+        stepsCountProgressBar.setProgress(stepsCompleted);
+
+
+        //Get an instance of the sensor manager.
+        mSensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
+        mSensorACC = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
+
+        // Step detector instance
+        mSensorStepDetector = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR);
+
+        //Get the writable database
+        GalleryViewModel  databaseOpenHelper =   new GalleryViewModel (this.getContext());;
+        SQLiteDatabase database = databaseOpenHelper.getWritableDatabase();
+
+        // Instantiate the StepCounterListener
+        listener = new StepCounterListener(database, stepsCountTextView, stepsCountProgressBar);
 
         // Toggle group button
         materialButtonToggleGroup = (MaterialButtonToggleGroup) root.findViewById(R.id.toggleButtonGroup);
@@ -73,44 +100,83 @@ public class HomeFragment extends Fragment {
                     //Place code related to Start button
                     Toast.makeText(getContext(), "START", Toast.LENGTH_SHORT).show();
 
-                    //register the ACC listener
-                    mSensorMangaer.registerListener(listener, mSensorACC, SensorManager.SENSOR_DELAY_NORMAL);
+                    // Check if the Accelerometer sensor exists
+                    if (mSensorACC != null) {
 
+                        // Register the ACC listener
+                        mSensorManager.registerListener(listener, mSensorACC, SensorManager.SENSOR_DELAY_NORMAL);
+                    } else {
+                        Toast.makeText(getContext(), R.string.acc_not_available, Toast.LENGTH_SHORT).show();
+
+                    }
+
+                    // Check if the Step detector sensor exists
+                    if (mSensorStepDetector != null) {
+                        // Register the ACC listener
+                        mSensorManager.registerListener(listener, mSensorStepDetector, SensorManager.SENSOR_DELAY_NORMAL);
+
+                    } else {
+                        Toast.makeText(getContext(), R.string.step_not_available, Toast.LENGTH_SHORT).show();
+
+                    }
                 } else if (group.getCheckedButtonId() == R.id.toggleStop) {
                     //Place code related to Stop button
                     Toast.makeText(getContext(), "STOP", Toast.LENGTH_SHORT).show();
 
-                    mSensorMangaer.unregisterListener(listener);
+                    mSensorManager.unregisterListener(listener);
                 }
             }
         });
+
         return root;
+    }
+
+    @Override
+    public void onDestroyView (){
+        super.onDestroyView();
+        mSensorManager.unregisterListener(listener);
     }
 
 }
 
-
 // Sensor event listener
-class StepCounterListener implements SensorEventListener {
+class StepCounterListener<stepsCompleted> implements SensorEventListener {
 
     private long lastUpdate = 0;
 
     // ACC Step counter
-    public static int mACCStepCounter = 0;
+    // public int mACCStepCounter = 0;
+
+    //Get the number of stored steps for the current day
+    public int mACCStepCounter = HomeFragment.stepsCompleted;
+
+
     ArrayList<Integer> mACCSeries = new ArrayList<Integer>();
-    private double accMag = 0;
+    ArrayList<String> mTimeSeries = new ArrayList<String>();
+
+    private double accMag = 0d;
     private int lastXPoint = 1;
-    int stepThreshold = 6;
+    int stepThreshold = 10;
 
     // Android step detector
-    int mAndroidStepCount = 0;
+    public int mAndroidStepCounter = 0;
 
-    // TextView
+
+    // TextView and Progress Bar
     TextView stepsCountTextView;
+    ProgressBar stepsCountProgressBar;
 
-    //TODO 10
-    public StepCounterListener(TextView tv){
+    //
+    SQLiteDatabase database;
+    public String timestamp;
+    public String day;
+    public String hour;
+
+    // Get the database, TextView and ProgressBar as args
+    public StepCounterListener(SQLiteDatabase db, TextView tv, ProgressBar pb){
         stepsCountTextView = tv;
+        stepsCountProgressBar = pb;
+        database = db;
     }
 
     @Override
@@ -118,27 +184,24 @@ class StepCounterListener implements SensorEventListener {
 
         switch (event.sensor.getType()) {
 
-            // TODO 5: Get the sensor type
+            // Case of the ACC
             case Sensor.TYPE_LINEAR_ACCELERATION:
 
-                // TODO 6: Get sensor's values
+                // Get x,y,z
                 float x = event.values[0];
                 float y = event.values[1];
                 float z = event.values[2];
 
-
                 //////////////////////////// -- PRINT ACC VALUES -- ////////////////////////////////////
-                // TODO 7: Uncomment the following code
-
-
                 // Timestamp
                 long timeInMillis = System.currentTimeMillis() + (event.timestamp - SystemClock.elapsedRealtimeNanos()) / 1000000;
 
                 // Convert the timestamp to date
-                SimpleDateFormat jdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                SimpleDateFormat jdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
                 jdf.setTimeZone(TimeZone.getTimeZone("GMT+2"));
                 String date = jdf.format(timeInMillis);
 
+                /*
                 // print a value every 1000 ms
                 long curTime = System.currentTimeMillis();
                 if ((curTime - lastUpdate) > 1000) {
@@ -148,42 +211,45 @@ class StepCounterListener implements SensorEventListener {
                             + String.valueOf(z) + " t: " + String.valueOf(date));
 
                 }
+                */
 
-
+                // Get the date, the day and the hour
+                timestamp = date;
+                day = date.substring(0,10);
+                hour = date.substring(11,13);
 
                 ////////////////////////////////////////////////////////////////////////////////////////
 
-                // TODO 8: Compute the ACC magnitude
+                /// STEP COUNTER ACC ////
+                accMag = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
 
                 //Update the Magnitude series
                 mACCSeries.add((int) accMag);
 
+                //Update the time series
+                mTimeSeries.add(timestamp);
 
-                /// STEP COUNTER ACC ////
+
                 // Calculate ACC peaks and steps
-                accMag = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2));
                 peakDetection();
 
                 break;
 
             // case Step detector
-            //case Sensor.TYPE_STEP_DETECTION:
+            case Sensor.TYPE_STEP_DETECTOR:
+
                 // Calculate the number of steps
-                //countSteps(event.values[0]);
-
-
+                countSteps(event.values[0]);
         }
     }
 
-
-
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
+        //
     }
 
 
-    private void peakDetection() {
+    public void peakDetection() {
         int windowSize = 20;
 
         /* Peak detection algorithm derived from: A Step Counter Service for Java-Enabled Devices Using a Built-In Accelerometer, Mladenov et al.
@@ -194,6 +260,7 @@ class StepCounterListener implements SensorEventListener {
         }
 
         List<Integer> valuesInWindow = mACCSeries.subList(lastXPoint,highestValX);
+        List<String> timesInWindow = mTimeSeries.subList(lastXPoint,highestValX);
 
         lastXPoint = highestValX;
 
@@ -201,11 +268,13 @@ class StepCounterListener implements SensorEventListener {
         int downwardSlope = 0;
 
         List<Integer> dataPointList = new ArrayList<Integer>();
+        List<String> timePointList = new ArrayList<String>();
+
 
         for (int p =0; p < valuesInWindow.size(); p++){
-            dataPointList.add(valuesInWindow.get(p));
+            dataPointList.add(valuesInWindow.get(p)); // ACC Magnitude data points
+            timePointList.add(timesInWindow.get(p)); // Timestamps
         }
-
 
         for (int i = 0; i < dataPointList.size(); i++) {
             if (i == 0) {
@@ -215,25 +284,38 @@ class StepCounterListener implements SensorEventListener {
                 downwardSlope = dataPointList.get(i)- dataPointList.get(i - 1);
 
                 if (forwardSlope < 0 && downwardSlope > 0 && dataPointList.get(i) > stepThreshold ) {
+
+                    // Update the number of steps
                     mACCStepCounter += 1;
-                    Log.d("ACC STEPS: ", String.valueOf(mACCStepCounter));
+                    //   Log.d("ACC STEPS: ", String.valueOf(mACCStepCounter));
 
-                    //TODO 12: update the text view
+                    // Update the TextView and the ProgressBar
                     stepsCountTextView.setText(String.valueOf(mACCStepCounter));
+                    stepsCountProgressBar.setProgress(mACCStepCounter);
 
+                    //Insert the data in the database
+                    ContentValues values = new ContentValues();
+                    values.put(GalleryViewModel.KEY_TIMESTAMP, timePointList.get(i));
+                    values.put(GalleryViewModel.KEY_DAY, day);
+                    values.put(GalleryViewModel.KEY_HOUR, hour);
+                    database.insert(GalleryViewModel.TABLE_NAME, null, values);
                 }
+
             }
         }
     }
 
+
     // Calculate the number of steps from the step detector
     private void countSteps(float step) {
 
-        int mstepCount = (int) step;
-
-        Log.d("NUM STEPS ANDROID:", "Num.steps: " + String.valueOf(mstepCount));
-
-
-
+        //Step count
+        mAndroidStepCounter += (int) step;
+        Log.d("NUM STEPS ANDROID", "Num.steps: " + String.valueOf(mAndroidStepCounter));
     }
+
 }
+
+
+
+

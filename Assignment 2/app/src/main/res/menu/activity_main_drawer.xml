@@ -9,6 +9,14 @@
             android:icon="@drawable/ic_menu_steps"
             android:title="@string/menu_steps" />
         <item
+            android:id="@+id/nav_hour"
+            android:icon="@drawable/ic_menu_steps"
+            android:title="@string/Hour" />
+        <item
+            android:id="@+id/nav_day"
+            android:icon="@drawable/ic_menu_steps"
+            android:title="@string/Day" />
+        <item
             android:id="@+id/menu_report"
             android:icon="@drawable/ic_menu_report"
             android:title="@string/menu_report" />

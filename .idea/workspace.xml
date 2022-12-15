@@ -10,14 +10,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="349abc52-1ad2-4f83-9b1b-7d9b40c46c8f" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Assignment 1/.idea/deploymentTargetDropDown.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Assignment 1/.idea/deploymentTargetDropDown.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assignment 2/app/src/main/java/com/example/stepapp/ui/gallery/GalleryFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/Assignment 2/app/src/main/java/com/example/stepapp/ui/gallery/GalleryFragment.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assignment 2/app/src/main/java/com/example/stepapp/ui/gallery/GalleryViewModel.java" beforeDir="false" afterPath="$PROJECT_DIR$/Assignment 2/app/src/main/java/com/example/stepapp/ui/gallery/GalleryViewModel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assignment 2/app/src/main/java/com/example/stepapp/ui/home/HomeFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/Assignment 2/app/src/main/java/com/example/stepapp/ui/home/HomeFragment.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/StepAppT03Starter/Erifeoluwa_Jamgbadi_Assignment01.docx" beforeDir="false" afterPath="$PROJECT_DIR$/StepAppT03Starter/Erifeoluwa_Jamgbadi_Assignment01.docx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/StepAppT03Starter/app/src/main/java/com/example/stepapp/ui/home/HomeFragment.java" beforeDir="false" afterPath="$PROJECT_DIR$/StepAppT03Starter/app/src/main/java/com/example/stepapp/ui/home/HomeFragment.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[C:\Users\SAMSUNG\.android\avd\Nexus_5_API_31.avd]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[C:\Users\SAMSUNG\.android\avd\Nexus_5_API_31_2.avd]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -39,7 +44,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="RunOnceActivity.cidr.known.project.marker" value="true" />
     <property name="cidr.known.project.marker" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/StepApp" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/StepAppT05Starter" />
     <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.17" />
     <property name="project.structure.side.proportion" value="0.2" />
@@ -49,7 +54,6 @@
   </component>
   <component name="RunManager">
     <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App">
-      <module name="HelloWorld.app.main" />
       <option name="DEPLOY" value="true" />
       <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />
       <option name="DEPLOY_AS_INSTANT" value="false" />
@@ -103,9 +107,7 @@
       <option name="ACTIVITY_CLASS" value="" />
       <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="false" />
       <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
-      <method v="2">
-        <option name="Android.Gradle.BeforeRunTask" enabled="true" />
-      </method>
+      <method v="2" />
     </configuration>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
